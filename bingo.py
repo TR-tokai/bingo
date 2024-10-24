@@ -1,6 +1,9 @@
 import TkEasyGUI as eg
 import random
 
+lst = list(range(1, 76))
+loglst = list()
+
 
 # レイアウト定義
 layout = [
@@ -15,7 +18,7 @@ layout = [
 
     # 履歴
     [
-        eg.Frame('履歴', [[eg.Text('', key='log', font=('arial', 50))]],)
+        eg.Frame('履歴', [[eg.Text('', key='log', font=('arial', 10), expand_x=True, expand_y=True)]], expand_x=True)
     ],
 
     # ボタン各種
@@ -38,7 +41,6 @@ while True:
 
     # 「スタート」ボタンクリックで
     if event == 'start':
-
         # ストップボタン有効化
         window['stop'].update(disabled=False)
         # スタートボタン無効化
@@ -46,12 +48,25 @@ while True:
         # リセットボタン有効化
         window['reset'].update(disabled=True)
 
+        # 終了ボタンクリックで終了
+        if event == '終了' or event == eg.WIN_CLOSED:
+                window.close()
+                break
+
 
         while True:
             window.refresh()
             event, values = window.read(50)
-            window['bingo'].update(random.randint(1,75))
+            r = random.sample(lst, 1)
+            window['bingo'].update(r)
 
+            # 終了ボタンクリックで終了
+            if event == '終了' or event == eg.WIN_CLOSED:
+                window.close()
+                break
+
+
+            # 「ストップ」ボタンクリックで
             if event == 'stop':
                 # ストップボタン無効化
                 window['start'].update(disabled=False)
@@ -59,19 +74,32 @@ while True:
                 window['stop'].update(disabled=True)
                 # リセットボタン有効化
                 window['reset'].update(disabled=False)
-                break
 
-            # 終了ボタンクリックで終了
-            if event == '終了' or event == eg.WIN_CLOSED:
-                window.close()
-                break
+                if not r in loglst:
+                    loglst.append(r)
+                    window['log'].update(loglst)
+                    break
 
-    if event == 'reset':
+                while r in loglst:
+                    r = random.sample(lst, 1)
+                    window['bingo'].update(r)
+                    if not r in loglst:
+                        loglst.append(r)
+                        window['log'].update(loglst)
+                        break
+
+                if window['log'].update:
+                    print(loglst)
+                    break
+
+    # 「リセット」ボタン
+    elif event == 'reset':
         window['bingo'].update('BINGO')
-        window['log'].update('')
+        loglst.clear()
+        window['log'].update(loglst)
 
 
     # 終了ボタンクリックで終了
-    if event == '終了' or event == eg.WIN_CLOSED:
+    elif event == '終了' or event == eg.WIN_CLOSED:
         window.close()
         break
